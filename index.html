@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GameHub - Find Your Next Gaming Adventure</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Add Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Add favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <!-- Notification container -->
+  <div class="notification" id="notification">
+    <i class="fas fa-info-circle"></i>
+    <span id="notificationText">Notification Message</span>
+  </div>
+
+  <header>
+    <div class="logo">
+      <i class="fas fa-gamepad"></i>
+      <span>GameHub</span>
+    </div>
+    <nav class="navbar">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="#" id="likedGamesBtn"><i class="fas fa-heart"></i> Liked Games</a>
+      <div class="category">
+        <button><i class="fas fa-tags"></i> Categories</button>
+        <div class="dropdown" id="categoryDropdown">
+          <!-- Categories dynamically inserted -->
+        </div>
+      </div>
+    </nav>
+    <div class="search-box">
+      <input type="text" id="gameSearch" placeholder="Search games...">
+      <i class="fas fa-search"></i>
+    </div>
+    <div class="auth-buttons">
+      <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <h2><i class="fas fa-chess-board"></i> Explore 2D Games</h2>
+    <p>Forget about flashy graphics and try out these 2D masterpieces instead! Simple visuals but deep gameplay for endless fun.</p>
+    
+    <!-- New featured games section -->
+    <div class="featured-section">
+      <h3><i class="fas fa-star"></i> Featured Games</h3>
+      <div class="featured-game" data-game-link="#">
+        <img src="assets/Hector Alvarez.jpg" alt="Featured Game">
+        <div class="featured-game-info">
+          <div class="featured-game-title">Hector Alvarez</div>
+          <div class="featured-game-category">2D</div>
+        </div>
+      </div>
+      <div class="featured-game" data-game-link="#">
+        <img src="assets/Snake Game.jpg" alt="Featured Game">
+        <div class="featured-game-info">
+          <div class="featured-game-title">Snake Game</div>
+          <div class="featured-game-category">2D</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New recently played games section -->
+    <div class="featured-section recently-played">
+      <h3><i class="fas fa-history"></i> Recently Played</h3>
+      <div class="recently-played-games" id="recentlyPlayedGames">
+        <!-- Recently played games will be added dynamically -->
+        <div class="empty-recent">
+          <i class="fas fa-gamepad"></i>
+          <p>No recently played games</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game stats section -->
+    <div class="featured-section stats-section">
+      <h3><i class="fas fa-chart-bar"></i> Your Stats</h3>
+      <div class="stat-item">
+        <i class="fas fa-gamepad"></i>
+        <span>Games Played: </span>
+        <span id="gamesPlayedCount">0</span>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <h1 class="section-title"><i class="fas fa-fire"></i> Popular Games</h1>
+    
+    <!-- Filter ribbon -->
+    <div class="filter-ribbon" id="filterRibbon">
+      <div class="filter-chip active" data-filter="all"><i class="fas fa-border-all"></i> All Games</div>
+      <!-- More filters will be added dynamically -->
+    </div>
+    
+    <div class="games-gallery" id="gamesGallery">
+      <div class="game-card" data-title="Chicken Scream" data-category="2D" data-game-link="#">
+        <span class="like-btn" aria-label="Like this game">
+          <i class="far fa-heart"></i>
+        </span>
+        <img src="assets/Chicken Scream.jpg" alt="Chicken Scream">
+        <div class="game-info">
+          <h3>Chicken Scream</h3>
+          <p class="game-category"><i class="fas fa-chess-board"></i> 2D</p>
+          <div class="game-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="far fa-star"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="game-card" data-title="Snake Game" data-category="2D" data-game-link="#">
+        <span class="like-btn" aria-label="Like this game">
+          <i class="far fa-heart"></i>
+        </span>
+        <img src="assets/Snake Game.jpg" alt="Snake Game">
+        <div class="game-info">
+          <h3>Snake Game</h3>
+          <p class="game-category"><i class="fas fa-chess-board"></i> 2D</p>
+          <div class="game-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+            <i class="far fa-star"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="game-card" data-title="Hector Alvarez" data-category="2D" data-game-link="https://www.google.com/">
+        <span class="like-btn" aria-label="Like this game">
+          <i class="far fa-heart"></i>
+        </span>
+        <img src="assets/Hector Alvarez.jpg" alt="Hector Alvarez">
+        <div class="game-info">
+          <h3>Hector Alvarez</h3>
+          <p class="game-category"><i class="fas fa-chess-board"></i> 2D</p>
+          <div class="game-rating">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Empty state (hidden by default) -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No games found</h3>
+      <p>Try changing your search criteria</p>
+    </div>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
