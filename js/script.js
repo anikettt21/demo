@@ -58,14 +58,12 @@ document.addEventListener("DOMContentLoaded", function () {
         gameCard.setAttribute('data-category', game.category);
         gameCard.setAttribute('data-game-link', game.link || '#');
         
-        // Create card HTML structure with play button
+        // Create card HTML structure
         gameCard.innerHTML = `
+          <a href="#" class="card-overlay-link"></a>
           <span class="like-btn" aria-label="Like this game">
             <i class="far fa-heart"></i>
           </span>
-          <div class="play-btn" aria-label="Play this game">
-            <i class="fas fa-play-circle"></i>
-          </div>
           <img src="${game.image}" alt="${game.title}">
           <div class="game-info">
             <h3>${game.title}</h3>
@@ -78,6 +76,55 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Add to games gallery
         gamesGallery.appendChild(gameCard);
+        
+        // Add event listeners to the new card
+        const likeBtn = gameCard.querySelector('.like-btn');
+        const gameLink = game.link || '#';
+        const gameTitle = game.title;
+        
+        // Make sure like button doesn't trigger navigation
+        if (likeBtn) {
+          likeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            // Toggle between filled and outline heart icons
+            const icon = this.querySelector('i');
+            const isLiked = icon.classList.contains('fas');
+            
+            if (isLiked) {
+              icon.classList.replace('fas', 'far');
+              showNotification('Game removed from your liked games');
+            } else {
+              icon.classList.replace('far', 'fas');
+              icon.classList.add('fa-beat');
+              showNotification('Game added to your liked games');
+              
+              // Remove animation after it completes
+              setTimeout(() => {
+                icon.classList.remove('fa-beat');
+              }, 1000);
+            }
+            
+            this.classList.toggle("liked");
+            
+            // Save likes to localStorage
+            saveLikedGames();
+          });
+        }
+        
+        // Make the entire card clickable
+        gameCard.style.cursor = 'pointer';
+        
+        // Add click event to the entire card
+        gameCard.addEventListener('click', function(e) {
+          // Only proceed if the click wasn't on the like button
+          if (!e.target.closest('.like-btn')) {
+            recordGamePlayed(gameTitle, gameLink);
+            showNotification(`Opening ${gameTitle}...`);
+            window.location.href = gameLink;
+          }
+        });
       });
       
       // Refresh category filters to include new games
@@ -196,65 +243,22 @@ document.addEventListener("DOMContentLoaded", function () {
     loadUserStats();
   }
   
-  // Function to open a game by its link
-  function openGameLink(title, link) {
-    if (!link || link === '#') return;
+  // Add click handlers to existing game cards
+  function setupExistingGameCards() {
+    const allGameCards = document.querySelectorAll(".game-card");
     
-    recordGamePlayed(title, link);
-    showNotification(`Opening ${title}...`);
-    
-    try {
-      // Open link in new tab if it's a URL
-      if (link.startsWith('http')) {
-        const newWindow = window.open(link, '_blank');
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-          // Popup was blocked, try direct navigation
-          window.location.href = link;
-        }
-      } else {
-        window.location.href = link;
-      }
-    } catch (e) {
-      console.error("Error opening game link:", e);
-      // Fallback to direct navigation
-      window.location.href = link;
-    }
-  }
-  
-  // Add click handlers to all game cards
-  function setupAllGameClickHandlers() {
-    // Remove any existing event listeners first (clean slate)
-    document.querySelectorAll('.game-card').forEach(card => {
-      const clone = card.cloneNode(true);
-      card.parentNode.replaceChild(clone, card);
-    });
-    
-    document.querySelectorAll('.featured-game').forEach(game => {
-      const clone = game.cloneNode(true);
-      game.parentNode.replaceChild(clone, game);
-    });
-    
-    // Set up all game cards
-    document.querySelectorAll('.game-card').forEach(card => {
+    allGameCards.forEach(card => {
       const gameLink = card.getAttribute('data-game-link') || '#';
       const gameTitle = card.getAttribute('data-title');
-      
-      // Add play button if not already present
-      if (!card.querySelector('.play-btn')) {
-        const playBtn = document.createElement('div');
-        playBtn.className = 'play-btn';
-        playBtn.setAttribute('aria-label', 'Play this game');
-        playBtn.innerHTML = '<i class="fas fa-play-circle"></i>';
-        card.appendChild(playBtn);
-      }
-      
-      // Set up like button
       const likeBtn = card.querySelector('.like-btn');
+
+      // Make sure like button doesn't trigger navigation
       if (likeBtn) {
         likeBtn.addEventListener('click', function(e) {
           e.stopPropagation();
           e.preventDefault();
           
+          // Toggle between filled and outline heart icons
           const icon = this.querySelector('i');
           const isLiked = icon.classList.contains('fas');
           
@@ -266,72 +270,68 @@ document.addEventListener("DOMContentLoaded", function () {
             icon.classList.add('fa-beat');
             showNotification('Game added to your liked games');
             
+            // Remove animation after it completes
             setTimeout(() => {
               icon.classList.remove('fa-beat');
             }, 1000);
           }
           
           this.classList.toggle("liked");
+          
+          // Save likes to localStorage
           saveLikedGames();
         });
       }
       
-      // Set up play button
-      const playBtn = card.querySelector('.play-btn');
-      if (playBtn) {
-        playBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          openGameLink(gameTitle, gameLink);
-        });
-      }
+      // Make the entire card clickable
+      card.style.cursor = 'pointer';
       
-      // Set up the entire card click
+      // Add click event to the entire card
       card.addEventListener('click', function(e) {
-        // Skip if click was on like button
-        if (e.target.closest('.like-btn')) return;
-        
-        // Skip if click was on play button (already handled)
-        if (e.target.closest('.play-btn')) return;
-        
-        // Otherwise, open the game link
-        openGameLink(gameTitle, gameLink);
+        // Only proceed if the click wasn't on the like button
+        if (!e.target.closest('.like-btn')) {
+          recordGamePlayed(gameTitle, gameLink);
+          showNotification(`Opening ${gameTitle}...`);
+          window.location.href = gameLink;
+        }
       });
     });
-    
-    // Set up featured games
+  }
+  
+  // Make featured games clickable
+  function setupFeaturedGames() {
     document.querySelectorAll('.featured-game').forEach(game => {
       const link = game.getAttribute('data-game-link') || '#';
       const title = game.querySelector('.featured-game-title')?.textContent;
       
+      // Make the entire featured game clickable
       game.style.cursor = 'pointer';
       
-      // Add play button if not already present
-      if (!game.querySelector('.play-btn')) {
-        const playBtn = document.createElement('div');
-        playBtn.className = 'play-btn featured-play-btn';
-        playBtn.setAttribute('aria-label', 'Play this game');
-        playBtn.innerHTML = '<i class="fas fa-play-circle"></i>';
-        game.appendChild(playBtn);
-      }
+      game.addEventListener('click', function() {
+        if (title) {
+          recordGamePlayed(title, link);
+          showNotification(`Opening ${title}...`);
+          window.location.href = link;
+        }
+      });
+    });
+  }
+  
+  // Function to attach click handlers to recently played games
+  function attachClickHandlersToRecentGames() {
+    document.querySelectorAll('#recentlyPlayedGames .featured-game').forEach(game => {
+      const link = game.getAttribute('data-game-link') || '#';
+      const title = game.querySelector('.featured-game-title')?.textContent;
       
-      // Set up play button
-      const playBtn = game.querySelector('.play-btn');
-      if (playBtn) {
-        playBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          if (title) openGameLink(title, link);
-        });
-      }
+      // Make the entire game clickable
+      game.style.cursor = 'pointer';
       
-      // Set up the entire card click
-      game.addEventListener('click', function(e) {
-        // Skip if click was on play button (already handled)
-        if (e.target.closest('.play-btn')) return;
-        
-        // Otherwise, open the game link
-        if (title) openGameLink(title, link);
+      game.addEventListener('click', function() {
+        if (title) {
+          recordGamePlayed(title, link);
+          showNotification(`Opening ${title}...`);
+          window.location.href = link;
+        }
       });
     });
   }
@@ -581,7 +581,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize
   addGameButton();
   loadCustomGames();
-  setupAllGameClickHandlers();
+  setupExistingGameCards();
+  setupFeaturedGames();
   loadLikedGames();
   loadUserStats();
   
@@ -593,70 +594,4 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // Initialize the page with all games
   filterByCategory('all');
-  
-  // Add CSS for the play button
-  document.addEventListener('DOMContentLoaded', function() {
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-      .game-card {
-        position: relative;
-      }
-      .play-btn {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(231, 76, 60, 0.8);
-        color: white;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s, transform 0.3s;
-        z-index: 10;
-        cursor: pointer;
-      }
-      .play-btn i {
-        font-size: 28px;
-      }
-      .game-card:hover .play-btn {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-      }
-      .play-btn:hover {
-        background-color: rgba(231, 76, 60, 1);
-        transform: translate(-50%, -50%) scale(1.2) !important;
-      }
-      .featured-play-btn {
-        width: 40px;
-        height: 40px;
-      }
-      .featured-play-btn i {
-        font-size: 20px;
-      }
-    `;
-    document.head.appendChild(styleSheet);
-  });
-  
-  // Replace setupExistingGameCards and setupFeaturedGames with the centralized function
-  // These functions are now kept for backward compatibility
-  function setupExistingGameCards() {
-    // This function is kept for backward compatibility
-    // All functionality has been moved to setupAllGameClickHandlers
-    console.log("Using setupAllGameClickHandlers instead");
-  }
-  
-  function setupFeaturedGames() {
-    // This function is kept for backward compatibility
-    // All functionality has been moved to setupAllGameClickHandlers
-    console.log("Using setupAllGameClickHandlers instead");
-  }
-  
-  function attachClickHandlersToRecentGames() {
-    // Update the recently played games in setupAllGameClickHandlers
-    setupAllGameClickHandlers();
-  }
 });
